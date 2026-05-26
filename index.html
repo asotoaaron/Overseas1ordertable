@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>팀 커피 주문 - Coway</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
   :root {
     --primary: #2563eb;
@@ -166,6 +169,17 @@
   body.is-admin .admin-only { display: inherit; }
   body.is-admin .admin-only-flex { display: flex; }
   body.is-admin .admin-only-inline { display: inline-flex; }
+
+  /* Firebase 상태 배너 */
+  .fb-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .fb-banner.warn { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+  .fb-banner.ok { background: #d1fae5; border: 1px solid #10b981; color: #065f46; }
+  .fb-banner.err { background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; }
+  .fb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .fb-dot.ok { background: var(--success); animation: pulse 2s infinite; }
+  .fb-dot.warn { background: var(--admin); }
+  .fb-dot.err { background: var(--hot); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 </style>
 </head>
 <body>
@@ -181,6 +195,8 @@
       <div class="admin-dropdown" id="adminDropdown" hidden></div>
     </div>
   </header>
+
+  <div id="fbBanner"></div>
 
   <div class="admin-banner admin-only" style="display: none;" id="adminBanner">
     <span>✨ 관리자 모드 활성화됨 — 메뉴/팀원/주문 관리가 가능합니다</span>
@@ -457,12 +473,119 @@ if (migrated) localStorage.setItem('coffeeOrders', JSON.stringify(state.orders))
 localStorage.setItem('cafes', JSON.stringify(state.cafes));
 localStorage.setItem('members', JSON.stringify(state.members));
 
+/* ============ Firebase Firestore 연결 ============ */
+let db = null;
+let isFirebaseReady = false;
+let suppressNextSnapshot = { orders: false, members: false, cafes: false };
+
+function initFirebase() {
+  const cfg = window.firebaseConfig;
+  if (!cfg || !cfg.apiKey || !cfg.projectId) return false;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.firestore();
+    isFirebaseReady = true;
+    return true;
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    return false;
+  }
+}
+
+async function bootstrapFirestore() {
+  if (!isFirebaseReady) return;
+  try {
+    const [oDoc, mDoc, cDoc] = await Promise.all([
+      db.collection('app').doc('orders').get(),
+      db.collection('app').doc('members').get(),
+      db.collection('app').doc('cafes').get(),
+    ]);
+    if (!oDoc.exists) await db.collection('app').doc('orders').set({ items: state.orders });
+    if (!mDoc.exists) await db.collection('app').doc('members').set({ list: state.members });
+    if (!cDoc.exists) await db.collection('app').doc('cafes').set({ data: state.cafes });
+  } catch (e) {
+    console.error('Bootstrap failed:', e);
+    renderFbBanner('err', `Firestore 초기화 실패: ${e.message}`);
+  }
+}
+
+function startFirestoreSync() {
+  if (!isFirebaseReady) return;
+  db.collection('app').doc('orders').onSnapshot(doc => {
+    if (suppressNextSnapshot.orders) { suppressNextSnapshot.orders = false; return; }
+    const d = doc.data();
+    if (d && Array.isArray(d.items)) {
+      state.orders = d.items;
+      localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+      renderOrders();
+      if (state.tab === 'history') renderCalendar();
+    }
+  }, err => { console.error('orders sync err:', err); renderFbBanner('err', '주문 동기화 실패: ' + err.message); });
+
+  db.collection('app').doc('members').onSnapshot(doc => {
+    if (suppressNextSnapshot.members) { suppressNextSnapshot.members = false; return; }
+    const d = doc.data();
+    if (d && Array.isArray(d.list)) {
+      state.members = d.list;
+      localStorage.setItem('members', JSON.stringify(state.members));
+      renderPersons();
+    }
+  }, err => { console.error('members sync err:', err); });
+
+  db.collection('app').doc('cafes').onSnapshot(doc => {
+    if (suppressNextSnapshot.cafes) { suppressNextSnapshot.cafes = false; return; }
+    const d = doc.data();
+    if (d && d.data) {
+      state.cafes = d.data;
+      localStorage.setItem('cafes', JSON.stringify(state.cafes));
+      renderCafes();
+      renderMenu();
+      renderOption();
+    }
+  }, err => { console.error('cafes sync err:', err); });
+}
+
+function renderFbBanner(level, msg) {
+  const div = document.getElementById('fbBanner');
+  if (!div) return;
+  if (level === 'ok') {
+    div.innerHTML = `<div class="fb-banner ok"><div class="fb-dot ok"></div><span><b>✅ 팀 공유 모드</b> — 모든 변경사항이 실시간으로 팀원에게 동기화됩니다.</span></div>`;
+  } else if (level === 'warn') {
+    div.innerHTML = `<div class="fb-banner warn"><div class="fb-dot warn"></div><span><b>⚠️ 공유 모드 미설정</b> — ${msg || '현재 본인 브라우저에만 저장됩니다. README의 Firebase 셋업 가이드를 따라 firebase-config.js를 설정하세요.'}</span></div>`;
+  } else if (level === 'err') {
+    div.innerHTML = `<div class="fb-banner err"><div class="fb-dot err"></div><span><b>❌ ${msg || 'Firebase 연결 실패'}</b> — 임시로 본인 브라우저에만 저장됩니다.</span></div>`;
+  } else {
+    div.innerHTML = '';
+  }
+}
+
 /* ============ 유틸 ============ */
 const $ = (id) => document.getElementById(id);
 const won = (n) => n.toLocaleString('ko-KR') + '원';
-const saveOrders = () => localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
-const saveCafes = () => localStorage.setItem('cafes', JSON.stringify(state.cafes));
-const saveMembers = () => localStorage.setItem('members', JSON.stringify(state.members));
+const saveOrders = () => {
+  localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+  if (isFirebaseReady) {
+    suppressNextSnapshot.orders = true;
+    db.collection('app').doc('orders').set({ items: state.orders })
+      .catch(e => { console.error(e); toast('동기화 실패 — 로컬만 저장', '#ef4444'); suppressNextSnapshot.orders = false; });
+  }
+};
+const saveCafes = () => {
+  localStorage.setItem('cafes', JSON.stringify(state.cafes));
+  if (isFirebaseReady) {
+    suppressNextSnapshot.cafes = true;
+    db.collection('app').doc('cafes').set({ data: state.cafes })
+      .catch(e => { console.error(e); toast('동기화 실패 — 로컬만 저장', '#ef4444'); suppressNextSnapshot.cafes = false; });
+  }
+};
+const saveMembers = () => {
+  localStorage.setItem('members', JSON.stringify(state.members));
+  if (isFirebaseReady) {
+    suppressNextSnapshot.members = true;
+    db.collection('app').doc('members').set({ list: state.members })
+      .catch(e => { console.error(e); toast('동기화 실패 — 로컬만 저장', '#ef4444'); suppressNextSnapshot.members = false; });
+  }
+};
 const toast = (msg, color) => {
   const t = $('toast');
   t.textContent = msg;
@@ -1315,6 +1438,17 @@ document.addEventListener('click', (e) => {
 /* ============ 초기 렌더 ============ */
 applyAdminClass();
 renderAll();
+
+/* ============ Firebase 부팅 ============ */
+(async function bootFirebase() {
+  if (initFirebase()) {
+    renderFbBanner('ok');
+    await bootstrapFirestore();
+    startFirestoreSync();
+  } else {
+    renderFbBanner('warn');
+  }
+})();
 </script>
 </body>
 </html>
