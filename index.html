@@ -18,37 +18,68 @@
     --success: #10b981;
     --warning: #f59e0b;
     --custom: #8b5cf6;
+    --admin: #f59e0b;
+    --admin-dark: #d97706;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.5; }
   .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  header { text-align: center; padding: 24px 0 16px; }
-  header h1 { font-size: 28px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; }
-  header .sub { color: var(--muted); font-size: 14px; }
+  header { padding: 24px 0 16px; position: relative; }
+  header h1 { font-size: 28px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; text-align: center; }
+  header .sub { color: var(--muted); font-size: 14px; text-align: center; }
+
+  /* 관리자 박스 */
+  .admin-box { position: absolute; top: 20px; right: 0; }
+  .admin-toggle { background: white; border: 2px solid var(--border); border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .admin-toggle:hover { border-color: var(--admin); }
+  .admin-toggle.unlocked { background: var(--admin); border-color: var(--admin); color: white; }
+  .admin-toggle.unlocked:hover { background: var(--admin-dark); }
+  .admin-toggle .arrow { font-size: 9px; opacity: 0.6; transition: transform 0.2s; }
+  .admin-toggle.open .arrow { transform: rotate(180deg); }
+  .admin-dropdown { position: absolute; top: 48px; right: 0; background: white; border: 2px solid var(--admin); border-radius: 10px; padding: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 240px; z-index: 50; }
+  .admin-dropdown .dd-title { font-size: 12px; font-weight: 700; color: var(--admin-dark); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .admin-dropdown .dd-row { display: flex; gap: 6px; align-items: center; }
+  .admin-dropdown input { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; min-width: 0; }
+  .admin-dropdown .dd-btn { padding: 8px 14px; background: var(--admin); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .admin-dropdown .dd-btn:hover { background: var(--admin-dark); }
+  .admin-dropdown .dd-btn.logout { background: #e2e8f0; color: var(--text); width: 100%; padding: 10px; }
+  .admin-dropdown .dd-btn.logout:hover { background: #cbd5e1; }
+  .admin-dropdown .dd-status { font-size: 12px; color: var(--muted); padding: 8px 0; line-height: 1.5; }
+  .admin-dropdown .dd-status b { color: var(--admin-dark); }
+  .admin-banner { background: linear-gradient(90deg, #fef3c7, #fde68a); border: 1px solid var(--admin); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; color: var(--admin-dark); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .admin-banner button { background: transparent; border: 1px solid var(--admin-dark); color: var(--admin-dark); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+
   .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--card); padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
   .tab { flex: 1; padding: 10px; text-align: center; border: none; background: transparent; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--muted); transition: all 0.15s; }
   .tab.active { background: var(--primary); color: white; }
   .tab:hover:not(.active) { background: #f1f5f9; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .admin-box { position: static; margin-bottom: 12px; display: flex; justify-content: center; } }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
   .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .badge { display: inline-block; background: var(--primary); color: white; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; background: white; cursor: pointer; font-size: 13px; transition: all 0.15s; user-select: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip { padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; background: white; cursor: pointer; font-size: 13px; transition: all 0.15s; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
   .chip:hover { border-color: var(--primary); }
   .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .chip .chip-del { background: transparent; border: none; color: var(--hot); cursor: pointer; font-size: 14px; padding: 0 2px; margin-left: 4px; }
+  .chip.active .chip-del { color: #fecaca; }
+  .chip.add-chip { border: 2px dashed var(--admin); color: var(--admin-dark); background: #fffbeb; font-weight: 700; }
+  .chip.add-chip:hover { background: #fef3c7; }
+
   .menu-list { display: flex; flex-direction: column; gap: 6px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
-  .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.12s; }
+  .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.12s; gap: 8px; }
   .menu-item:hover { border-color: var(--primary); background: #f0f7ff; }
   .menu-item.active { border-color: var(--primary); background: #eff6ff; }
-  .menu-item .name { font-size: 14px; font-weight: 500; }
+  .menu-item .name { font-size: 14px; font-weight: 500; flex: 1; }
   .menu-item .price { font-size: 13px; color: var(--muted); font-weight: 600; }
   .menu-item.custom-menu { border-color: #ddd6fe; background: #faf5ff; }
   .menu-item.custom-menu:hover { border-color: var(--custom); }
   .menu-item.custom-menu.active { border-color: var(--custom); background: #f3e8ff; }
-  .menu-item .menu-del { background: transparent; border: none; color: var(--hot); cursor: pointer; font-size: 14px; padding: 0 4px; opacity: 0; transition: opacity 0.12s; }
-  .menu-item:hover .menu-del { opacity: 1; }
+  .menu-item .menu-actions { display: flex; gap: 2px; }
+  .menu-item .icon-btn { background: transparent; border: none; cursor: pointer; padding: 2px 6px; font-size: 14px; border-radius: 4px; color: var(--muted); }
+  .menu-item .icon-btn:hover { background: #e2e8f0; color: var(--text); }
+  .menu-item .icon-btn.danger:hover { background: #fee2e2; color: var(--hot); }
   .star { color: var(--custom); font-size: 11px; margin-left: 4px; }
   .temp-row { display: flex; gap: 8px; margin-top: 12px; }
   .temp-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.12s; }
@@ -63,10 +94,12 @@
   .btn-secondary:hover { background: #cbd5e1; }
   .btn-custom { background: var(--custom); }
   .btn-custom:hover { background: #7c3aed; }
+  .btn-admin { background: var(--admin); }
+  .btn-admin:hover { background: var(--admin-dark); }
   .btn-danger { background: #ef4444; }
   .btn-danger:hover { background: #dc2626; }
   .btn-sm { padding: 6px 10px; font-size: 12px; }
-  .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .order-list { display: flex; flex-direction: column; gap: 8px; }
   .order-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px; background: #f1f5f9; border-radius: 8px; }
   .order-item .info { flex: 1; }
@@ -85,7 +118,6 @@
   .toast.show { opacity: 1; }
   footer { text-align: center; padding: 24px 0; color: var(--muted); font-size: 12px; }
 
-  /* 날짜 카드 */
   .date-card { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .date-card input[type=date] { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
   .date-pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -93,14 +125,21 @@
   .date-pill:hover { border-color: var(--primary); }
   .date-label { font-weight: 700; font-size: 14px; color: var(--primary-dark); }
 
-  /* 새 메뉴 추가 폼 */
   .add-menu-form { background: #f8fafc; border: 1px dashed var(--custom); border-radius: 8px; padding: 12px; margin-top: 8px; }
   .add-menu-form .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 6px; margin-bottom: 6px; }
   .add-menu-form .temp-opts { display: flex; gap: 4px; margin-bottom: 8px; }
   .add-menu-form .temp-opt { flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; font-size: 11px; text-align: center; }
   .add-menu-form .temp-opt.active { background: var(--custom); color: white; border-color: var(--custom); }
 
-  /* 달력 */
+  /* 인라인 편집 폼 */
+  .edit-form { background: #fffbeb; border: 1px solid var(--admin); border-radius: 8px; padding: 10px; margin: 6px 0; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .edit-form input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+  .edit-form input.name { flex: 1; min-width: 100px; }
+  .edit-form input.price { width: 90px; }
+  .edit-form button { padding: 6px 10px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .edit-form .save { background: var(--success); color: white; }
+  .edit-form .cancel { background: #e2e8f0; }
+
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .cal-nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 16px; }
   .cal-nav-btn:hover { background: #f1f5f9; }
@@ -122,6 +161,11 @@
   .cal-count { background: var(--success); color: white; font-size: 10px; padding: 1px 5px; border-radius: 999px; font-weight: 700; align-self: flex-end; }
   .cal-amount { font-size: 9px; color: var(--muted); text-align: right; }
   .cal-day.selected .cal-amount { color: rgba(255,255,255,0.85); }
+
+  .admin-only { display: none; }
+  body.is-admin .admin-only { display: inherit; }
+  body.is-admin .admin-only-flex { display: flex; }
+  body.is-admin .admin-only-inline { display: inline-flex; }
 </style>
 </head>
 <body>
@@ -129,7 +173,19 @@
   <header>
     <h1>☕ 팀 커피 주문</h1>
     <div class="sub">Coway · 구로 G타워 인근 카페 모음</div>
+    <div class="admin-box">
+      <button class="admin-toggle" id="adminToggle">
+        <span id="adminToggleLabel">🔒 관리자 모드</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="admin-dropdown" id="adminDropdown" hidden></div>
+    </div>
   </header>
+
+  <div class="admin-banner admin-only" style="display: none;" id="adminBanner">
+    <span>✨ 관리자 모드 활성화됨 — 메뉴/팀원/주문 관리가 가능합니다</span>
+    <button id="adminLogout">관리자 모드 끄기</button>
+  </div>
 
   <div class="tabs">
     <button class="tab active" data-tab="order">📝 주문하기</button>
@@ -138,7 +194,6 @@
 
   <!-- ============ 주문 탭 ============ -->
   <div id="orderTab">
-    <!-- 0단계: 날짜 -->
     <div class="card" style="margin-bottom: 16px;">
       <h2><span class="badge">0</span> 주문 날짜</h2>
       <div class="date-card">
@@ -152,13 +207,11 @@
     </div>
 
     <div class="grid">
-      <!-- 1단계: 주문자 -->
       <div class="card">
-        <h2><span class="badge">1</span> 주문자 선택</h2>
+        <h2><span class="badge">1</span> 주문자 선택 <span class="admin-only" style="font-size:11px; color:var(--admin-dark); font-weight:500;">(칩 더블클릭=이름변경, ✕=삭제)</span></h2>
         <div class="chips" id="personChips"></div>
       </div>
 
-      <!-- 2단계: 카페 -->
       <div class="card">
         <h2><span class="badge">2</span> 카페 선택</h2>
         <div class="chips" id="cafeChips"></div>
@@ -166,18 +219,16 @@
     </div>
 
     <div class="grid" style="margin-top: 16px;">
-      <!-- 3단계: 메뉴 -->
       <div class="card">
         <h2>
           <span class="badge">3</span> 메뉴 선택
-          <button class="btn btn-custom btn-sm" id="toggleAddMenuBtn" style="margin-left:auto;" hidden>＋ 메뉴 추가</button>
+          <button class="btn btn-custom btn-sm admin-only" id="toggleAddMenuBtn" style="margin-left:auto;" hidden>＋ 메뉴 추가</button>
         </h2>
         <div id="menuArea">
           <div class="empty">카페를 먼저 선택하세요</div>
         </div>
       </div>
 
-      <!-- 4단계: 주문 추가 -->
       <div class="card">
         <h2><span class="badge">4</span> 옵션 & 추가</h2>
         <div id="optionArea">
@@ -186,7 +237,6 @@
       </div>
     </div>
 
-    <!-- 주문 리스트 -->
     <div class="card" style="margin-top: 16px;">
       <h2>📋 <span id="dateLabelInList"></span> 주문 목록 <span id="orderCount" style="color: var(--muted); font-weight: 400; font-size: 13px;"></span></h2>
       <div id="orderList" class="order-list"><div class="empty">아직 주문이 없습니다</div></div>
@@ -194,7 +244,8 @@
       <div class="btn-row">
         <button class="btn" id="copyBtn">📋 주문 텍스트 복사</button>
         <button class="btn btn-secondary" id="exportBtn">💾 파일로 저장</button>
-        <button class="btn btn-danger" id="clearBtn">🗑️ 이 날짜 주문 삭제</button>
+        <button class="btn btn-danger admin-only" id="clearBtn">🗑️ 이 날짜 주문 삭제</button>
+        <button class="btn btn-danger admin-only" id="clearAllBtn">⚠️ 전체 주문 초기화</button>
       </div>
     </div>
   </div>
@@ -229,8 +280,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============ 데이터 ============ */
-const MEMBERS = ['최윤석', '이존수', '이승헌', '이수호', '김선태', '김동진', '엄지수', '바마유나'];
+/* ============ 기본 데이터 ============ */
+const DEFAULT_MEMBERS = ['최윤석', '이존수', '이승헌', '이수호', '김선태', '김동진', '엄지수', '바마유나'];
 
 const DEFAULT_CAFES = {
   paulbassett: {
@@ -343,8 +394,10 @@ const DEFAULT_CAFES = {
       { name: '요거트 스무디', price: 5500, temp: false, iceOnly: true },
     ],
   },
-  custom: { name: '기타 (직접 입력)', icon: '✍️', note: '카페명/메뉴/가격을 수기 입력', custom: true },
+  custom: { name: '기타 (직접 입력)', icon: '✍️', note: '카페명/메뉴/가격을 수기 입력', custom: true, menus: [] },
 };
+
+const ADMIN_PASSWORD = '0000';
 
 /* ============ 상태 ============ */
 function todayStr() {
@@ -353,7 +406,30 @@ function todayStr() {
 }
 function ymStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 
+// localStorage 로드 + 기본값 머지
+function loadCafes() {
+  const saved = JSON.parse(localStorage.getItem('cafes') || 'null');
+  if (saved) {
+    // 새로 추가된 기본 카페가 있을 수 있으니 머지 (없는 키만 채움)
+    Object.keys(DEFAULT_CAFES).forEach(k => {
+      if (!saved[k]) saved[k] = JSON.parse(JSON.stringify(DEFAULT_CAFES[k]));
+    });
+    // customMenus 레거시 데이터 머지
+    const legacyCustom = JSON.parse(localStorage.getItem('customMenus') || '{}');
+    Object.entries(legacyCustom).forEach(([k, arr]) => {
+      if (saved[k] && Array.isArray(arr)) {
+        arr.forEach(m => saved[k].menus.push({ ...m, _userAdded: true }));
+      }
+    });
+    if (Object.keys(legacyCustom).length) localStorage.removeItem('customMenus');
+    return saved;
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_CAFES));
+}
+
 const state = {
+  isAdmin: localStorage.getItem('isAdmin') === '1',
+  showDropdown: false,
   date: todayStr(),
   person: null,
   cafeKey: null,
@@ -363,24 +439,30 @@ const state = {
   customMenu: '',
   customPrice: '',
   orders: JSON.parse(localStorage.getItem('coffeeOrders') || '[]'),
-  customMenus: JSON.parse(localStorage.getItem('customMenus') || '{}'),
+  members: JSON.parse(localStorage.getItem('members') || 'null') || [...DEFAULT_MEMBERS],
+  cafes: loadCafes(),
   showAddMenuForm: false,
   newMenu: { name: '', price: '', temp: 'both' },
+  editingMenu: null,
+  editingPerson: null,
   tab: 'order',
   calendarMonth: ymStr(new Date()),
   historyDate: todayStr(),
 };
 
-// 기존 주문에 date 필드 없으면 오늘로 백필 (마이그레이션)
+// 마이그레이션: 기존 주문에 date 필드 없으면 오늘로
 let migrated = false;
 state.orders.forEach(o => { if (!o.date) { o.date = todayStr(); migrated = true; } });
 if (migrated) localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+localStorage.setItem('cafes', JSON.stringify(state.cafes));
+localStorage.setItem('members', JSON.stringify(state.members));
 
 /* ============ 유틸 ============ */
 const $ = (id) => document.getElementById(id);
 const won = (n) => n.toLocaleString('ko-KR') + '원';
-const save = () => localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
-const saveCustomMenus = () => localStorage.setItem('customMenus', JSON.stringify(state.customMenus));
+const saveOrders = () => localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+const saveCafes = () => localStorage.setItem('cafes', JSON.stringify(state.cafes));
+const saveMembers = () => localStorage.setItem('members', JSON.stringify(state.members));
 const toast = (msg, color) => {
   const t = $('toast');
   t.textContent = msg;
@@ -397,11 +479,95 @@ function formatDate(d) {
   if (d === todayStr()) suffix = ' (오늘)';
   return `${y}.${m}.${day} (${dow})${suffix}`;
 }
-function getCafeMenus(cafeKey) {
-  const base = DEFAULT_CAFES[cafeKey];
-  if (!base || base.custom) return [];
-  const customs = state.customMenus[cafeKey] || [];
-  return [...base.menus.map(m => ({ ...m, _custom: false })), ...customs.map(m => ({ ...m, _custom: true }))];
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============ 관리자 게이트 ============ */
+function applyAdminClass() {
+  document.body.classList.toggle('is-admin', state.isAdmin);
+  $('adminBanner').style.display = state.isAdmin ? 'flex' : 'none';
+  const btn = $('adminToggle');
+  const label = $('adminToggleLabel');
+  if (state.isAdmin) {
+    btn.classList.add('unlocked');
+    label.textContent = '🔓 관리자';
+  } else {
+    btn.classList.remove('unlocked');
+    label.textContent = '🔒 관리자 모드';
+  }
+}
+
+function renderDropdown() {
+  const dd = $('adminDropdown');
+  const btn = $('adminToggle');
+  btn.classList.toggle('open', state.showDropdown);
+  if (!state.showDropdown) {
+    dd.hidden = true;
+    dd.innerHTML = '';
+    return;
+  }
+  dd.hidden = false;
+  if (state.isAdmin) {
+    dd.innerHTML = `
+      <div class="dd-title">🔓 관리자 모드 ON</div>
+      <div class="dd-status">편집을 마쳤다면 아래 버튼으로<br>관리자 모드를 끄세요.</div>
+      <button class="dd-btn logout" id="ddLogoutBtn">관리자 모드 끄기</button>
+    `;
+    $('ddLogoutBtn').onclick = () => { logoutAdmin(); };
+  } else {
+    dd.innerHTML = `
+      <div class="dd-title">🔒 관리자 로그인</div>
+      <div class="dd-row">
+        <input type="password" id="adminPwd" placeholder="비밀번호" maxlength="20" autocomplete="off">
+        <button class="dd-btn" id="adminPwdSubmit">확인</button>
+      </div>
+    `;
+    const pwd = $('adminPwd');
+    setTimeout(() => pwd.focus(), 0);
+    pwd.onkeydown = (e) => {
+      if (e.key === 'Enter') tryUnlock();
+      if (e.key === 'Escape') closeDropdown();
+    };
+    $('adminPwdSubmit').onclick = tryUnlock;
+  }
+}
+
+function openDropdown() {
+  state.showDropdown = true;
+  renderDropdown();
+}
+function closeDropdown() {
+  state.showDropdown = false;
+  renderDropdown();
+}
+function toggleDropdown() {
+  state.showDropdown ? closeDropdown() : openDropdown();
+}
+
+function tryUnlock() {
+  const input = $('adminPwd');
+  if (!input) return;
+  const pwd = input.value;
+  if (pwd === ADMIN_PASSWORD) {
+    state.isAdmin = true;
+    localStorage.setItem('isAdmin', '1');
+    closeDropdown();
+    applyAdminClass();
+    renderAll();
+    toast('관리자 모드 활성화됨');
+  } else {
+    toast('비밀번호가 틀렸습니다', '#ef4444');
+    input.value = '';
+    input.focus();
+  }
+}
+
+function logoutAdmin() {
+  state.isAdmin = false;
+  localStorage.removeItem('isAdmin');
+  closeDropdown();
+  applyAdminClass();
+  renderAll();
+  toast('관리자 모드 해제됨');
 }
 
 /* ============ 렌더링 ============ */
@@ -419,14 +585,38 @@ function renderDate() {
 }
 
 function renderPersons() {
-  $('personChips').innerHTML = MEMBERS.map(m =>
-    `<div class="chip ${state.person === m ? 'active' : ''}" data-person="${m}">${m}</div>`
-  ).join('');
+  const html = state.members.map((m, i) => {
+    if (state.editingPerson === i) {
+      return `<form class="edit-form" data-edit-person-form="${i}" style="display:inline-flex;">
+        <input class="name" id="editPersonName" value="${escHtml(m)}" autofocus>
+        <button type="submit" class="save">저장</button>
+        <button type="button" class="cancel" data-cancel-person>취소</button>
+      </form>`;
+    }
+    return `<div class="chip ${state.person === m ? 'active' : ''}" data-person="${escHtml(m)}" data-person-idx="${i}" title="${state.isAdmin ? '더블클릭=이름변경' : ''}">
+      ${escHtml(m)}
+      ${state.isAdmin ? `<button class="chip-del" data-del-person="${i}" title="삭제">✕</button>` : ''}
+    </div>`;
+  }).join('');
+  const addBtn = state.isAdmin ? `<div class="chip add-chip" data-add-person>＋ 팀원 추가</div>` : '';
+  $('personChips').innerHTML = html + addBtn;
+
+  if (state.editingPerson !== null) {
+    setTimeout(() => {
+      const inp = $('editPersonName');
+      if (inp) { inp.focus(); inp.select(); }
+    }, 0);
+    const form = document.querySelector(`[data-edit-person-form="${state.editingPerson}"]`);
+    if (form) form.onsubmit = (e) => {
+      e.preventDefault();
+      saveEditedPerson(state.editingPerson, $('editPersonName').value);
+    };
+  }
 }
 
 function renderCafes() {
-  $('cafeChips').innerHTML = Object.entries(DEFAULT_CAFES).map(([k, c]) =>
-    `<div class="chip ${state.cafeKey === k ? 'active' : ''}" data-cafe="${k}" title="${c.note || ''}">${c.icon} ${c.name}</div>`
+  $('cafeChips').innerHTML = Object.entries(state.cafes).map(([k, c]) =>
+    `<div class="chip ${state.cafeKey === k ? 'active' : ''}" data-cafe="${k}" title="${escHtml(c.note || '')}">${c.icon} ${escHtml(c.name)}</div>`
   ).join('');
 }
 
@@ -439,40 +629,51 @@ function renderMenu() {
     addBtn.hidden = true;
     return;
   }
-  const cafe = DEFAULT_CAFES[state.cafeKey];
+  const cafe = state.cafes[state.cafeKey];
   if (cafe.custom) {
     addBtn.hidden = true;
     area.innerHTML = `
       <div class="notice">기타 카페는 직접 입력합니다. 우측에서 메뉴/가격을 입력하세요.</div>
       <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">카페명</label>
-      <input class="input" id="customCafeInput" placeholder="예: 스타벅스 구로점" value="${state.customCafe}">
+      <input class="input" id="customCafeInput" placeholder="예: 스타벅스 구로점" value="${escHtml(state.customCafe)}">
     `;
     $('customCafeInput').addEventListener('input', e => { state.customCafe = e.target.value; renderOption(); });
     return;
   }
 
-  addBtn.hidden = false;
+  addBtn.hidden = !state.isAdmin;
   addBtn.textContent = state.showAddMenuForm ? '✕ 취소' : '＋ 메뉴 추가';
 
-  const menus = getCafeMenus(state.cafeKey);
+  const menus = cafe.menus;
   area.innerHTML = `
-    <div class="notice">${cafe.note || ''}</div>
+    <div class="notice">${escHtml(cafe.note || '')}</div>
     <div class="menu-list">
-      ${menus.map((m, i) => `
-        <div class="menu-item ${m._custom ? 'custom-menu' : ''} ${state.menuIdx === i ? 'active' : ''}" data-menu="${i}">
-          <span class="name">
-            ${m.name}
-            ${m._custom ? '<span class="star">★</span>' : ''}
-            ${m.iceOnly ? ' <span class="pill-ice">ICE</span>' : ''}
-          </span>
-          <span style="display:flex; align-items:center; gap:4px;">
+      ${menus.map((m, i) => {
+        if (state.editingMenu && state.editingMenu.cafeKey === state.cafeKey && state.editingMenu.idx === i) {
+          return `<form class="edit-form" data-edit-menu-form>
+            <input class="name" id="editMenuName" value="${escHtml(m.name)}" placeholder="메뉴명">
+            <input class="price" id="editMenuPrice" type="number" value="${m.price}" placeholder="가격">
+            <button type="submit" class="save">저장</button>
+            <button type="button" class="cancel" data-cancel-menu>취소</button>
+          </form>`;
+        }
+        return `
+          <div class="menu-item ${m._userAdded ? 'custom-menu' : ''} ${state.menuIdx === i ? 'active' : ''}" data-menu="${i}">
+            <span class="name">
+              ${escHtml(m.name)}
+              ${m._userAdded ? '<span class="star">★</span>' : ''}
+              ${m.iceOnly ? ' <span class="pill-ice">ICE</span>' : ''}
+            </span>
             <span class="price">${won(m.price)}</span>
-            ${m._custom ? `<button class="menu-del" data-del-menu="${i}" title="삭제">✕</button>` : ''}
-          </span>
-        </div>
-      `).join('')}
+            <span class="menu-actions admin-only">
+              <button class="icon-btn" data-edit-menu="${i}" title="편집">✏️</button>
+              <button class="icon-btn danger" data-del-menu="${i}" title="삭제">✕</button>
+            </span>
+          </div>
+        `;
+      }).join('')}
     </div>
-    ${state.showAddMenuForm ? renderAddMenuForm() : ''}
+    ${state.showAddMenuForm && state.isAdmin ? renderAddMenuForm() : ''}
   `;
 
   if (state.showAddMenuForm) {
@@ -484,6 +685,15 @@ function renderMenu() {
     });
     $('saveMenuBtn').onclick = saveNewMenu;
   }
+
+  if (state.editingMenu) {
+    setTimeout(() => $('editMenuName')?.focus(), 0);
+    const form = document.querySelector('[data-edit-menu-form]');
+    if (form) form.onsubmit = (e) => {
+      e.preventDefault();
+      saveEditedMenu();
+    };
+  }
 }
 
 function renderAddMenuForm() {
@@ -491,7 +701,7 @@ function renderAddMenuForm() {
     <div class="add-menu-form">
       <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:var(--custom);">★ 이 카페에 새 메뉴 추가</div>
       <div class="form-row">
-        <input class="input" id="newMenuName" placeholder="메뉴명" value="${state.newMenu.name}">
+        <input class="input" id="newMenuName" placeholder="메뉴명" value="${escHtml(state.newMenu.name)}">
         <input class="input" id="newMenuPrice" type="number" placeholder="가격" value="${state.newMenu.price}">
       </div>
       <div class="temp-opts">
@@ -506,7 +716,7 @@ function renderAddMenuForm() {
 
 function renderOption() {
   const area = $('optionArea');
-  const cafe = state.cafeKey ? DEFAULT_CAFES[state.cafeKey] : null;
+  const cafe = state.cafeKey ? state.cafes[state.cafeKey] : null;
 
   if (!cafe) {
     area.innerHTML = '<div class="empty">메뉴를 먼저 선택하세요</div>';
@@ -516,7 +726,7 @@ function renderOption() {
   if (cafe.custom) {
     area.innerHTML = `
       <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">메뉴명</label>
-      <input class="input" id="customMenuInput" placeholder="예: 카라멜 마키아토" value="${state.customMenu}" style="margin-bottom:10px;">
+      <input class="input" id="customMenuInput" placeholder="예: 카라멜 마키아토" value="${escHtml(state.customMenu)}" style="margin-bottom:10px;">
       <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">가격 (숫자만)</label>
       <input class="input" id="customPriceInput" type="number" placeholder="예: 5500" value="${state.customPrice}" style="margin-bottom:10px;">
       <div class="temp-row">
@@ -542,8 +752,7 @@ function renderOption() {
     return;
   }
 
-  const menus = getCafeMenus(state.cafeKey);
-  const menu = menus[state.menuIdx];
+  const menu = cafe.menus[state.menuIdx];
   if (!menu) { area.innerHTML = '<div class="empty">메뉴를 다시 선택하세요</div>'; return; }
 
   const showTemp = menu.temp;
@@ -551,8 +760,8 @@ function renderOption() {
 
   area.innerHTML = `
     <div style="padding:12px; background:#f1f5f9; border-radius:8px; margin-bottom:12px;">
-      <div style="font-weight:700; font-size:15px;">${menu.name} ${menu._custom ? '<span class="star">★</span>' : ''}</div>
-      <div style="font-size:13px; color:var(--muted); margin-top:2px;">${cafe.name}</div>
+      <div style="font-weight:700; font-size:15px;">${escHtml(menu.name)} ${menu._userAdded ? '<span class="star">★</span>' : ''}</div>
+      <div style="font-size:13px; color:var(--muted); margin-top:2px;">${escHtml(cafe.name)}</div>
       <div style="font-weight:700; color:var(--primary-dark); font-size:16px; margin-top:6px;">${won(menu.price)}</div>
     </div>
     ${showTemp ? `
@@ -590,16 +799,16 @@ function renderOrders() {
     return `
       <div class="order-item">
         <div class="info">
-          <div class="person">${o.person}</div>
+          <div class="person">${escHtml(o.person)}</div>
           <div class="detail">
             ${o.temp === 'HOT' ? '<span class="pill-hot">HOT</span>' : ''}
             ${o.temp === 'ICE' ? '<span class="pill-ice">ICE</span>' : ''}
-            ${o.menu} · ${won(o.price)}
-            ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${o.note}</div>` : ''}
+            ${escHtml(o.menu)} · ${won(o.price)}
+            ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${escHtml(o.note)}</div>` : ''}
           </div>
-          <div class="cafe">${o.cafe}</div>
+          <div class="cafe">${escHtml(o.cafe)}</div>
         </div>
-        <button class="remove" data-remove="${realIdx}" title="삭제">✕</button>
+        ${state.isAdmin ? `<button class="remove" data-remove="${realIdx}" title="삭제">✕</button>` : ''}
       </div>
     `;
   }).join('');
@@ -614,13 +823,12 @@ function renderOrders() {
   });
   $('summary').innerHTML = `
     <div class="summary">
-      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${c}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
+      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${escHtml(c)}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
       <div class="row total"><span>합계</span><span>${dayOrders.length}잔 · ${won(total)}</span></div>
     </div>
   `;
 }
 
-/* ============ 달력 ============ */
 function renderCalendar() {
   const [y, m] = state.calendarMonth.split('-').map(Number);
   const first = new Date(y, m - 1, 1);
@@ -634,7 +842,6 @@ function renderCalendar() {
     `<div class="cal-dow ${i===0?'sun':''} ${i===6?'sat':''}">${d}</div>`
   ).join('');
 
-  // 주문 데이터를 날짜별로 집계
   const byDate = {};
   state.orders.forEach(o => {
     if (!byDate[o.date]) byDate[o.date] = { count: 0, sum: 0 };
@@ -672,14 +879,14 @@ function renderHistoryDay() {
   list.innerHTML = dayOrders.map(o => `
     <div class="order-item">
       <div class="info">
-        <div class="person">${o.person}</div>
+        <div class="person">${escHtml(o.person)}</div>
         <div class="detail">
           ${o.temp === 'HOT' ? '<span class="pill-hot">HOT</span>' : ''}
           ${o.temp === 'ICE' ? '<span class="pill-ice">ICE</span>' : ''}
-          ${o.menu} · ${won(o.price)}
-          ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${o.note}</div>` : ''}
+          ${escHtml(o.menu)} · ${won(o.price)}
+          ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${escHtml(o.note)}</div>` : ''}
         </div>
-        <div class="cafe">${o.cafe}</div>
+        <div class="cafe">${escHtml(o.cafe)}</div>
       </div>
     </div>
   `).join('');
@@ -693,10 +900,20 @@ function renderHistoryDay() {
   });
   $('historySummary').innerHTML = `
     <div class="summary">
-      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${c}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
+      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${escHtml(c)}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
       <div class="row total"><span>합계</span><span>${dayOrders.length}잔 · ${won(total)}</span></div>
     </div>
   `;
+}
+
+function renderAll() {
+  renderTabs();
+  renderDate();
+  renderPersons();
+  renderCafes();
+  renderMenu();
+  renderOption();
+  renderOrders();
 }
 
 /* ============ 액션 ============ */
@@ -705,7 +922,7 @@ function addOrder() {
   if (!state.person) return toast('주문자를 선택하세요', '#ef4444');
   if (!state.cafeKey) return toast('카페를 선택하세요', '#ef4444');
 
-  const cafe = DEFAULT_CAFES[state.cafeKey];
+  const cafe = state.cafes[state.cafeKey];
   let menuName, price, cafeName;
 
   if (cafe.custom) {
@@ -717,8 +934,7 @@ function addOrder() {
     cafeName = state.customCafe.trim();
   } else {
     if (state.menuIdx === null) return toast('메뉴를 선택하세요', '#ef4444');
-    const menus = getCafeMenus(state.cafeKey);
-    const m = menus[state.menuIdx];
+    const m = cafe.menus[state.menuIdx];
     if (m.temp && !state.temp) return toast('HOT / ICE를 선택하세요', '#ef4444');
     menuName = m.name;
     price = m.price;
@@ -739,7 +955,7 @@ function addOrder() {
     note,
     at: Date.now(),
   });
-  save();
+  saveOrders();
   renderOrders();
   toast(`${state.person} 주문 추가됨!`);
 
@@ -752,19 +968,32 @@ function addOrder() {
 }
 
 function removeOrder(i) {
+  if (!state.isAdmin) return toast('관리자만 삭제 가능합니다', '#ef4444');
   state.orders.splice(i, 1);
-  save();
+  saveOrders();
   renderOrders();
 }
 
 function clearDay() {
+  if (!state.isAdmin) return;
   const dayOrders = state.orders.filter(o => o.date === state.date);
   if (dayOrders.length === 0) return toast('삭제할 주문이 없습니다', '#ef4444');
   if (!confirm(`${formatDate(state.date)} 주문 ${dayOrders.length}건을 삭제할까요?`)) return;
   state.orders = state.orders.filter(o => o.date !== state.date);
-  save();
+  saveOrders();
   renderOrders();
   toast('해당 날짜 주문 삭제됨');
+}
+
+function clearAllOrders() {
+  if (!state.isAdmin) return;
+  if (state.orders.length === 0) return toast('주문이 없습니다', '#ef4444');
+  if (!confirm(`⚠️ 전체 주문 ${state.orders.length}건을 모두 삭제할까요?\n(되돌릴 수 없습니다)`)) return;
+  state.orders = [];
+  saveOrders();
+  renderOrders();
+  renderCalendar();
+  toast('전체 주문 초기화됨');
 }
 
 function saveNewMenu() {
@@ -773,34 +1002,105 @@ function saveNewMenu() {
   if (!name) return toast('메뉴명을 입력하세요', '#ef4444');
   if (!price || price <= 0) return toast('가격을 입력하세요', '#ef4444');
 
-  if (!state.customMenus[state.cafeKey]) state.customMenus[state.cafeKey] = [];
-  const menuObj = { name, price };
+  const menuObj = { name, _userAdded: true };
   if (state.newMenu.temp === 'both') menuObj.temp = true;
   else if (state.newMenu.temp === 'ice') { menuObj.temp = false; menuObj.iceOnly = true; }
   else menuObj.temp = false;
+  menuObj.price = price;
 
-  state.customMenus[state.cafeKey].push(menuObj);
-  saveCustomMenus();
+  state.cafes[state.cafeKey].menus.push(menuObj);
+  saveCafes();
   state.newMenu = { name: '', price: '', temp: 'both' };
   state.showAddMenuForm = false;
   renderMenu();
   toast(`★ "${name}" 메뉴 추가됨`);
 }
 
-function deleteCustomMenu(idx) {
-  const menus = getCafeMenus(state.cafeKey);
-  const m = menus[idx];
-  if (!m || !m._custom) return;
+function deleteMenu(idx) {
+  if (!state.isAdmin) return;
+  const m = state.cafes[state.cafeKey].menus[idx];
+  if (!m) return;
   if (!confirm(`"${m.name}" 메뉴를 삭제할까요?`)) return;
-
-  const base = DEFAULT_CAFES[state.cafeKey].menus.length;
-  const customIdx = idx - base;
-  state.customMenus[state.cafeKey].splice(customIdx, 1);
-  saveCustomMenus();
+  state.cafes[state.cafeKey].menus.splice(idx, 1);
+  saveCafes();
   state.menuIdx = null;
   renderMenu();
   renderOption();
   toast('메뉴 삭제됨');
+}
+
+function startEditMenu(idx) {
+  if (!state.isAdmin) return;
+  state.editingMenu = { cafeKey: state.cafeKey, idx };
+  renderMenu();
+}
+
+function saveEditedMenu() {
+  if (!state.editingMenu) return;
+  const name = $('editMenuName').value.trim();
+  const price = +$('editMenuPrice').value;
+  if (!name) return toast('메뉴명을 입력하세요', '#ef4444');
+  if (!price || price <= 0) return toast('가격을 입력하세요', '#ef4444');
+  const m = state.cafes[state.editingMenu.cafeKey].menus[state.editingMenu.idx];
+  m.name = name;
+  m.price = price;
+  saveCafes();
+  state.editingMenu = null;
+  renderMenu();
+  renderOption();
+  toast('메뉴 수정됨');
+}
+
+function cancelEditMenu() {
+  state.editingMenu = null;
+  renderMenu();
+}
+
+function addPerson() {
+  if (!state.isAdmin) return;
+  const name = prompt('추가할 팀원 이름을 입력하세요:');
+  if (!name || !name.trim()) return;
+  if (state.members.includes(name.trim())) return toast('이미 존재하는 팀원입니다', '#ef4444');
+  state.members.push(name.trim());
+  saveMembers();
+  renderPersons();
+  toast(`"${name.trim()}" 추가됨`);
+}
+
+function deletePerson(idx) {
+  if (!state.isAdmin) return;
+  const name = state.members[idx];
+  if (!name) return;
+  if (!confirm(`"${name}" 팀원을 목록에서 삭제할까요?\n(기존 주문 기록은 유지됩니다)`)) return;
+  state.members.splice(idx, 1);
+  saveMembers();
+  if (state.person === name) state.person = null;
+  renderPersons();
+  toast('팀원 삭제됨');
+}
+
+function startEditPerson(idx) {
+  if (!state.isAdmin) return;
+  state.editingPerson = idx;
+  renderPersons();
+}
+
+function saveEditedPerson(idx, newName) {
+  const name = newName.trim();
+  if (!name) return toast('이름을 입력하세요', '#ef4444');
+  const oldName = state.members[idx];
+  if (state.members.includes(name) && name !== oldName) return toast('이미 존재하는 이름입니다', '#ef4444');
+  state.members[idx] = name;
+  if (state.person === oldName) state.person = name;
+  saveMembers();
+  state.editingPerson = null;
+  renderPersons();
+  toast('이름 변경됨');
+}
+
+function cancelEditPerson() {
+  state.editingPerson = null;
+  renderPersons();
 }
 
 function buildText(date) {
@@ -865,46 +1165,113 @@ function exportAllCSV() {
 
 /* ============ 이벤트 ============ */
 document.addEventListener('click', (e) => {
-  if (e.target.dataset.tab) {
-    state.tab = e.target.dataset.tab;
+  const t = e.target;
+
+  // 관리자 박스 토글
+  if (t.id === 'adminToggle' || t.closest('#adminToggle')) {
+    toggleDropdown();
+    return;
+  }
+  if (t.id === 'adminLogout') { logoutAdmin(); return; }
+
+  if (t.dataset.tab) {
+    state.tab = t.dataset.tab;
     renderTabs();
     return;
   }
-  if (e.target.dataset.person) {
-    state.person = e.target.dataset.person;
+
+  // 팀원 삭제
+  if (t.dataset.delPerson !== undefined) {
+    e.stopPropagation();
+    deletePerson(+t.dataset.delPerson);
+    return;
+  }
+  // 팀원 추가
+  if (t.dataset.addPerson !== undefined || t.closest('[data-add-person]')) {
+    addPerson();
+    return;
+  }
+  // 팀원 편집 취소
+  if (t.dataset.cancelPerson !== undefined) {
+    cancelEditPerson();
+    return;
+  }
+  // 팀원 선택
+  if (t.dataset.person && state.editingPerson === null) {
+    state.person = t.dataset.person;
     renderPersons();
-  } else if (e.target.dataset.cafe) {
-    state.cafeKey = e.target.dataset.cafe;
+    return;
+  }
+
+  // 카페 선택
+  if (t.dataset.cafe) {
+    state.cafeKey = t.dataset.cafe;
     state.menuIdx = null;
     state.temp = null;
     state.showAddMenuForm = false;
+    state.editingMenu = null;
     renderCafes();
     renderMenu();
     renderOption();
-  } else if (e.target.dataset.delMenu !== undefined) {
+    return;
+  }
+
+  // 메뉴 삭제/편집
+  if (t.dataset.delMenu !== undefined) {
     e.stopPropagation();
-    deleteCustomMenu(+e.target.dataset.delMenu);
-  } else if (e.target.closest('[data-menu]')) {
-    state.menuIdx = +e.target.closest('[data-menu]').dataset.menu;
-    const menus = getCafeMenus(state.cafeKey);
-    const m = menus[state.menuIdx];
+    deleteMenu(+t.dataset.delMenu);
+    return;
+  }
+  if (t.dataset.editMenu !== undefined) {
+    e.stopPropagation();
+    startEditMenu(+t.dataset.editMenu);
+    return;
+  }
+  if (t.dataset.cancelMenu !== undefined) {
+    cancelEditMenu();
+    return;
+  }
+  // 메뉴 선택
+  if (t.closest('[data-menu]') && !state.editingMenu) {
+    state.menuIdx = +t.closest('[data-menu]').dataset.menu;
+    const m = state.cafes[state.cafeKey].menus[state.menuIdx];
     state.temp = m.iceOnly ? 'ICE' : null;
     renderMenu();
     renderOption();
-  } else if (e.target.dataset.remove !== undefined) {
-    removeOrder(+e.target.dataset.remove);
-  } else if (e.target.closest('[data-cal-date]')) {
-    state.historyDate = e.target.closest('[data-cal-date]').dataset.calDate;
+    return;
+  }
+
+  // 주문 삭제
+  if (t.dataset.remove !== undefined) {
+    removeOrder(+t.dataset.remove);
+    return;
+  }
+
+  // 달력 날짜 선택
+  if (t.closest('[data-cal-date]')) {
+    state.historyDate = t.closest('[data-cal-date]').dataset.calDate;
     state.date = state.historyDate;
     renderCalendar();
     renderDate();
     renderOrders();
-  } else if (e.target.dataset.quick) {
+    return;
+  }
+  // 빠른 날짜
+  if (t.dataset.quick) {
     const d = new Date();
-    if (e.target.dataset.quick === 'yesterday') d.setDate(d.getDate() - 1);
+    if (t.dataset.quick === 'yesterday') d.setDate(d.getDate() - 1);
     state.date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     renderDate();
     renderOrders();
+    return;
+  }
+});
+
+// 팀원 이름 변경 (더블클릭)
+document.addEventListener('dblclick', (e) => {
+  const t = e.target.closest('[data-person-idx]');
+  if (t && state.isAdmin) {
+    startEditPerson(+t.dataset.personIdx);
   }
 });
 
@@ -935,16 +1302,19 @@ $('nextMonth').onclick = () => {
 $('copyBtn').onclick = copyText;
 $('exportBtn').onclick = exportFile;
 $('clearBtn').onclick = clearDay;
+$('clearAllBtn').onclick = clearAllOrders;
 $('historyExportAll').onclick = exportAllCSV;
 
+// 바깥 클릭 시 드롭다운 닫기
+document.addEventListener('click', (e) => {
+  if (state.showDropdown && !e.target.closest('.admin-box')) {
+    closeDropdown();
+  }
+});
+
 /* ============ 초기 렌더 ============ */
-renderTabs();
-renderDate();
-renderPersons();
-renderCafes();
-renderMenu();
-renderOption();
-renderOrders();
+applyAdminClass();
+renderAll();
 </script>
 </body>
 </html>
