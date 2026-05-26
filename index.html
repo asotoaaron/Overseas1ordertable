@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팀 커피 주문 - Coway</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --hot: #ef4444;
+    --ice: #06b6d4;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --custom: #8b5cf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.5; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header { text-align: center; padding: 24px 0 16px; }
+  header h1 { font-size: 28px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; }
+  header .sub { color: var(--muted); font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--card); padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
+  .tab { flex: 1; padding: 10px; text-align: center; border: none; background: transparent; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--muted); transition: all 0.15s; }
+  .tab.active { background: var(--primary); color: white; }
+  .tab:hover:not(.active) { background: #f1f5f9; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-block; background: var(--primary); color: white; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; background: white; cursor: pointer; font-size: 13px; transition: all 0.15s; user-select: none; }
+  .chip:hover { border-color: var(--primary); }
+  .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .menu-list { display: flex; flex-direction: column; gap: 6px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+  .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.12s; }
+  .menu-item:hover { border-color: var(--primary); background: #f0f7ff; }
+  .menu-item.active { border-color: var(--primary); background: #eff6ff; }
+  .menu-item .name { font-size: 14px; font-weight: 500; }
+  .menu-item .price { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .menu-item.custom-menu { border-color: #ddd6fe; background: #faf5ff; }
+  .menu-item.custom-menu:hover { border-color: var(--custom); }
+  .menu-item.custom-menu.active { border-color: var(--custom); background: #f3e8ff; }
+  .menu-item .menu-del { background: transparent; border: none; color: var(--hot); cursor: pointer; font-size: 14px; padding: 0 4px; opacity: 0; transition: opacity 0.12s; }
+  .menu-item:hover .menu-del { opacity: 1; }
+  .star { color: var(--custom); font-size: 11px; margin-left: 4px; }
+  .temp-row { display: flex; gap: 8px; margin-top: 12px; }
+  .temp-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: white; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.12s; }
+  .temp-btn.hot.active { background: var(--hot); border-color: var(--hot); color: white; }
+  .temp-btn.ice.active { background: var(--ice); border-color: var(--ice); color: white; }
+  .input, .textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .input:focus, .textarea:focus { outline: none; border-color: var(--primary); }
+  .btn { padding: 12px 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.12s; }
+  .btn:hover { background: var(--primary-dark); }
+  .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+  .btn-secondary { background: #e2e8f0; color: var(--text); }
+  .btn-secondary:hover { background: #cbd5e1; }
+  .btn-custom { background: var(--custom); }
+  .btn-custom:hover { background: #7c3aed; }
+  .btn-danger { background: #ef4444; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+  .order-list { display: flex; flex-direction: column; gap: 8px; }
+  .order-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px; background: #f1f5f9; border-radius: 8px; }
+  .order-item .info { flex: 1; }
+  .order-item .person { font-weight: 700; font-size: 14px; color: var(--primary-dark); }
+  .order-item .detail { font-size: 13px; color: var(--text); margin-top: 2px; }
+  .order-item .cafe { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .order-item .remove { background: transparent; border: none; color: var(--hot); cursor: pointer; font-size: 18px; padding: 0 4px; }
+  .empty { color: var(--muted); text-align: center; padding: 24px; font-size: 13px; }
+  .summary { background: linear-gradient(135deg, #eff6ff, #ddd6fe); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 13px; }
+  .summary .row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .summary .total { font-weight: 700; font-size: 15px; border-top: 1px solid rgba(0,0,0,0.1); margin-top: 6px; padding-top: 6px; }
+  .pill-hot { display: inline-block; background: var(--hot); color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; font-weight: 700; }
+  .pill-ice { display: inline-block; background: var(--ice); color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; font-weight: 700; }
+  .notice { font-size: 12px; color: var(--muted); padding: 8px 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 12px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+  .toast.show { opacity: 1; }
+  footer { text-align: center; padding: 24px 0; color: var(--muted); font-size: 12px; }
+
+  /* 날짜 카드 */
+  .date-card { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .date-card input[type=date] { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .date-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .date-pill { padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: white; cursor: pointer; font-size: 12px; }
+  .date-pill:hover { border-color: var(--primary); }
+  .date-label { font-weight: 700; font-size: 14px; color: var(--primary-dark); }
+
+  /* 새 메뉴 추가 폼 */
+  .add-menu-form { background: #f8fafc; border: 1px dashed var(--custom); border-radius: 8px; padding: 12px; margin-top: 8px; }
+  .add-menu-form .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 6px; margin-bottom: 6px; }
+  .add-menu-form .temp-opts { display: flex; gap: 4px; margin-bottom: 8px; }
+  .add-menu-form .temp-opt { flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; font-size: 11px; text-align: center; }
+  .add-menu-form .temp-opt.active { background: var(--custom); color: white; border-color: var(--custom); }
+
+  /* 달력 */
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 16px; }
+  .cal-nav-btn:hover { background: #f1f5f9; }
+  .cal-title { font-weight: 700; font-size: 18px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); padding: 6px 0; }
+  .cal-dow.sun { color: var(--hot); }
+  .cal-dow.sat { color: var(--ice); }
+  .cal-day { aspect-ratio: 1 / 1; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; transition: all 0.12s; min-height: 56px; }
+  .cal-day:hover { border-color: var(--primary); }
+  .cal-day.empty { background: transparent; border: none; cursor: default; }
+  .cal-day.today { border-color: var(--primary); border-width: 2px; }
+  .cal-day.selected { background: var(--primary); color: white; border-color: var(--primary); }
+  .cal-day.selected .cal-count { background: white; color: var(--primary); }
+  .cal-day .cal-date { font-weight: 600; }
+  .cal-day .cal-date.sun { color: var(--hot); }
+  .cal-day .cal-date.sat { color: var(--ice); }
+  .cal-day.selected .cal-date { color: white; }
+  .cal-count { background: var(--success); color: white; font-size: 10px; padding: 1px 5px; border-radius: 999px; font-weight: 700; align-self: flex-end; }
+  .cal-amount { font-size: 9px; color: var(--muted); text-align: right; }
+  .cal-day.selected .cal-amount { color: rgba(255,255,255,0.85); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>☕ 팀 커피 주문</h1>
+    <div class="sub">Coway · 구로 G타워 인근 카페 모음</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="order">📝 주문하기</button>
+    <button class="tab" data-tab="history">📅 달력 / 이력</button>
+  </div>
+
+  <!-- ============ 주문 탭 ============ -->
+  <div id="orderTab">
+    <!-- 0단계: 날짜 -->
+    <div class="card" style="margin-bottom: 16px;">
+      <h2><span class="badge">0</span> 주문 날짜</h2>
+      <div class="date-card">
+        <input type="date" id="dateInput">
+        <span class="date-label" id="dateLabel"></span>
+        <div class="date-pills">
+          <div class="date-pill" data-quick="today">오늘</div>
+          <div class="date-pill" data-quick="yesterday">어제</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- 1단계: 주문자 -->
+      <div class="card">
+        <h2><span class="badge">1</span> 주문자 선택</h2>
+        <div class="chips" id="personChips"></div>
+      </div>
+
+      <!-- 2단계: 카페 -->
+      <div class="card">
+        <h2><span class="badge">2</span> 카페 선택</h2>
+        <div class="chips" id="cafeChips"></div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top: 16px;">
+      <!-- 3단계: 메뉴 -->
+      <div class="card">
+        <h2>
+          <span class="badge">3</span> 메뉴 선택
+          <button class="btn btn-custom btn-sm" id="toggleAddMenuBtn" style="margin-left:auto;" hidden>＋ 메뉴 추가</button>
+        </h2>
+        <div id="menuArea">
+          <div class="empty">카페를 먼저 선택하세요</div>
+        </div>
+      </div>
+
+      <!-- 4단계: 주문 추가 -->
+      <div class="card">
+        <h2><span class="badge">4</span> 옵션 & 추가</h2>
+        <div id="optionArea">
+          <div class="empty">메뉴를 먼저 선택하세요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 주문 리스트 -->
+    <div class="card" style="margin-top: 16px;">
+      <h2>📋 <span id="dateLabelInList"></span> 주문 목록 <span id="orderCount" style="color: var(--muted); font-weight: 400; font-size: 13px;"></span></h2>
+      <div id="orderList" class="order-list"><div class="empty">아직 주문이 없습니다</div></div>
+      <div id="summary"></div>
+      <div class="btn-row">
+        <button class="btn" id="copyBtn">📋 주문 텍스트 복사</button>
+        <button class="btn btn-secondary" id="exportBtn">💾 파일로 저장</button>
+        <button class="btn btn-danger" id="clearBtn">🗑️ 이 날짜 주문 삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 이력 탭 ============ -->
+  <div id="historyTab" hidden>
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="prevMonth">←</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="cal-nav-btn" id="nextMonth">→</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="notice" style="margin-top:12px;">날짜를 클릭하면 해당 날짜의 주문 내역을 볼 수 있습니다. 클릭 후 [주문하기] 탭에서 그 날짜에 추가 주문도 가능합니다.</div>
+    </div>
+
+    <div class="card">
+      <h2>📅 <span id="historyDateLabel"></span></h2>
+      <div id="historyOrders" class="order-list"></div>
+      <div id="historySummary"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="historyExportAll">📦 전체 기간 CSV 내보내기</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    가격은 변동될 수 있어 매장 확인 권장 · 모든 데이터는 브라우저(localStorage)에 자동 저장됩니다
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 데이터 ============ */
+const MEMBERS = ['최윤석', '이존수', '이승헌', '이수호', '김선태', '김동진', '엄지수', '바마유나'];
+
+const DEFAULT_CAFES = {
+  paulbassett: {
+    name: '폴 바셋 구로 G타워점', icon: '☕', note: '에스프레소 베이스 정통 커피',
+    menus: [
+      { name: '아메리카노', price: 4700, temp: true },
+      { name: '룽고', price: 4900, temp: false },
+      { name: '카페라떼', price: 5700, temp: true },
+      { name: '카푸치노', price: 5700, temp: true },
+      { name: '플랫 화이트', price: 5700, temp: false },
+      { name: '바닐라 카페라떼', price: 6200, temp: true },
+      { name: '스페니쉬 카페라떼', price: 6200, temp: true },
+      { name: '제주 말차 카페라떼', price: 7000, temp: true },
+      { name: '콜드브루', price: 4900, temp: false, iceOnly: true },
+      { name: '핫초콜릿', price: 6000, temp: true },
+      { name: '얼그레이 티-라떼', price: 6000, temp: true },
+      { name: '프라페 (시즌)', price: 7000, temp: false, iceOnly: true },
+    ],
+  },
+  bookcomma: {
+    name: '책다방 with 카페꼼마', icon: '📚', note: '넷마블 사옥 지하 1층 북카페',
+    menus: [
+      { name: '아메리카노', price: 5000, temp: true },
+      { name: '카페라떼', price: 5500, temp: true },
+      { name: '카푸치노', price: 6000, temp: true },
+      { name: '바닐라 라떼', price: 6000, temp: true },
+      { name: '카페모카', price: 6000, temp: true },
+      { name: '콜드브루', price: 5500, temp: false, iceOnly: true },
+      { name: '대추차', price: 6000, temp: true },
+      { name: '유자차', price: 6000, temp: true },
+      { name: '캐모마일 티', price: 5500, temp: true },
+      { name: '제철 과일 에이드', price: 6500, temp: false, iceOnly: true },
+      { name: '프렌치 토스트', price: 9800, temp: false },
+      { name: '카프레제 샐러드', price: 9800, temp: false },
+      { name: '햄치즈 파니니 세트', price: 10000, temp: false },
+    ],
+  },
+  kkdabang: {
+    name: '크크다방', icon: '🦖', note: '넷마블 3F · 젤라또 올린 음료가 시그니처',
+    menus: [
+      { name: '아메리카노', price: 3000, temp: true },
+      { name: '카페라떼', price: 4000, temp: true },
+      { name: '바닐라 라떼', price: 4500, temp: true },
+      { name: '카페모카', price: 4500, temp: true },
+      { name: '아인슈페너', price: 5500, temp: false, iceOnly: true },
+      { name: '블루베리 스무디', price: 5500, temp: false, iceOnly: true },
+      { name: '망고 스무디', price: 5500, temp: false, iceOnly: true },
+      { name: '망고 빙수 (S)', price: 12000, temp: false },
+      { name: '망고 빙수 (L)', price: 32000, temp: false },
+      { name: '인절미 빙수 (S)', price: 9000, temp: false },
+      { name: '인절미 빙수 (L)', price: 21000, temp: false },
+    ],
+  },
+  woodstone: {
+    name: '우드스톤 구로', icon: '🪵', note: '디지털로26길 · 우드톤 인테리어 카페',
+    menus: [
+      { name: '아메리카노', price: 4500, temp: true },
+      { name: '카페라떼', price: 5000, temp: true },
+      { name: '바닐라 라떼', price: 5500, temp: true },
+      { name: '카페모카', price: 5500, temp: true },
+      { name: '카푸치노', price: 5000, temp: true },
+      { name: '콜드브루', price: 5000, temp: false, iceOnly: true },
+      { name: '아인슈페너', price: 6000, temp: false, iceOnly: true },
+      { name: '말차 라떼', price: 5500, temp: true },
+      { name: '초코 라떼', price: 5500, temp: true },
+      { name: '자몽 에이드', price: 6000, temp: false, iceOnly: true },
+      { name: '레몬 에이드', price: 6000, temp: false, iceOnly: true },
+      { name: '캐모마일 티', price: 5000, temp: true },
+    ],
+  },
+  dessert39: {
+    name: '디저트39 지타워몰점', icon: '🍰', note: '프리미엄 디저트 & 음료 프랜차이즈',
+    menus: [
+      { name: 'I.V 아메리카노', price: 3400, temp: true },
+      { name: 'I.V 카페라떼', price: 4500, temp: true },
+      { name: 'I.V 바닐라 라떼', price: 4800, temp: true },
+      { name: 'I.V 돌체 라떼', price: 4800, temp: true },
+      { name: 'I.V 카페모카', price: 4800, temp: true },
+      { name: 'I.V 아인슈페너 라떼', price: 6100, temp: false, iceOnly: true },
+      { name: '제주 말차 라떼', price: 4800, temp: true },
+      { name: '흑임자 라떼', price: 4800, temp: true },
+      { name: '딸기 라떼', price: 4800, temp: true },
+      { name: '버블 흑당 밀크티', price: 5200, temp: true },
+      { name: '로얄 밀크티', price: 4800, temp: true },
+      { name: '망고 스무디', price: 5100, temp: false, iceOnly: true },
+      { name: '딸기 스무디', price: 5100, temp: false, iceOnly: true },
+      { name: '자바칩 프라페', price: 5500, temp: false, iceOnly: true },
+      { name: '슬림 딸기 요거트 라떼', price: 6400, temp: false, iceOnly: true },
+      { name: '0칼로리 복숭아 아이스티', price: 2900, temp: false, iceOnly: true },
+      { name: '컵빙수', price: 3900, temp: false },
+    ],
+  },
+  cafeimt: {
+    name: '카페아이엠티 지타워몰점', icon: '🥤', note: 'Cafe In My Time · 합리적 가격 카페',
+    menus: [
+      { name: '아메리카노', price: 3500, temp: true },
+      { name: '카페라떼', price: 4500, temp: true },
+      { name: '바닐라 라떼', price: 5000, temp: true },
+      { name: '카페모카', price: 5000, temp: true },
+      { name: '카푸치노', price: 4500, temp: true },
+      { name: '콜드브루', price: 4500, temp: false, iceOnly: true },
+      { name: '연유 라떼', price: 5000, temp: true },
+      { name: '말차 라떼', price: 5000, temp: true },
+      { name: '고구마 라떼', price: 5000, temp: true },
+      { name: '아이스 자스민', price: 4500, temp: false, iceOnly: true },
+      { name: '아이스 캐모마일', price: 4500, temp: false, iceOnly: true },
+      { name: '유자 슬러시', price: 5500, temp: false, iceOnly: true },
+      { name: '자몽 슬러시', price: 5500, temp: false, iceOnly: true },
+      { name: '레몬 슬러시', price: 5500, temp: false, iceOnly: true },
+      { name: '요거트 스무디', price: 5500, temp: false, iceOnly: true },
+    ],
+  },
+  custom: { name: '기타 (직접 입력)', icon: '✍️', note: '카페명/메뉴/가격을 수기 입력', custom: true },
+};
+
+/* ============ 상태 ============ */
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function ymStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+const state = {
+  date: todayStr(),
+  person: null,
+  cafeKey: null,
+  menuIdx: null,
+  temp: null,
+  customCafe: '',
+  customMenu: '',
+  customPrice: '',
+  orders: JSON.parse(localStorage.getItem('coffeeOrders') || '[]'),
+  customMenus: JSON.parse(localStorage.getItem('customMenus') || '{}'),
+  showAddMenuForm: false,
+  newMenu: { name: '', price: '', temp: 'both' },
+  tab: 'order',
+  calendarMonth: ymStr(new Date()),
+  historyDate: todayStr(),
+};
+
+// 기존 주문에 date 필드 없으면 오늘로 백필 (마이그레이션)
+let migrated = false;
+state.orders.forEach(o => { if (!o.date) { o.date = todayStr(); migrated = true; } });
+if (migrated) localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+
+/* ============ 유틸 ============ */
+const $ = (id) => document.getElementById(id);
+const won = (n) => n.toLocaleString('ko-KR') + '원';
+const save = () => localStorage.setItem('coffeeOrders', JSON.stringify(state.orders));
+const saveCustomMenus = () => localStorage.setItem('customMenus', JSON.stringify(state.customMenus));
+const toast = (msg, color) => {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--success)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+};
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  const dt = new Date(+y, +m - 1, +day);
+  const dow = ['일','월','화','수','목','금','토'][dt.getDay()];
+  let suffix = '';
+  if (d === todayStr()) suffix = ' (오늘)';
+  return `${y}.${m}.${day} (${dow})${suffix}`;
+}
+function getCafeMenus(cafeKey) {
+  const base = DEFAULT_CAFES[cafeKey];
+  if (!base || base.custom) return [];
+  const customs = state.customMenus[cafeKey] || [];
+  return [...base.menus.map(m => ({ ...m, _custom: false })), ...customs.map(m => ({ ...m, _custom: true }))];
+}
+
+/* ============ 렌더링 ============ */
+function renderTabs() {
+  $('orderTab').hidden = state.tab !== 'order';
+  $('historyTab').hidden = state.tab !== 'history';
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
+  if (state.tab === 'history') renderCalendar();
+}
+
+function renderDate() {
+  $('dateInput').value = state.date;
+  $('dateLabel').textContent = formatDate(state.date);
+  $('dateLabelInList').textContent = formatDate(state.date);
+}
+
+function renderPersons() {
+  $('personChips').innerHTML = MEMBERS.map(m =>
+    `<div class="chip ${state.person === m ? 'active' : ''}" data-person="${m}">${m}</div>`
+  ).join('');
+}
+
+function renderCafes() {
+  $('cafeChips').innerHTML = Object.entries(DEFAULT_CAFES).map(([k, c]) =>
+    `<div class="chip ${state.cafeKey === k ? 'active' : ''}" data-cafe="${k}" title="${c.note || ''}">${c.icon} ${c.name}</div>`
+  ).join('');
+}
+
+function renderMenu() {
+  const area = $('menuArea');
+  const addBtn = $('toggleAddMenuBtn');
+
+  if (!state.cafeKey) {
+    area.innerHTML = '<div class="empty">카페를 먼저 선택하세요</div>';
+    addBtn.hidden = true;
+    return;
+  }
+  const cafe = DEFAULT_CAFES[state.cafeKey];
+  if (cafe.custom) {
+    addBtn.hidden = true;
+    area.innerHTML = `
+      <div class="notice">기타 카페는 직접 입력합니다. 우측에서 메뉴/가격을 입력하세요.</div>
+      <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">카페명</label>
+      <input class="input" id="customCafeInput" placeholder="예: 스타벅스 구로점" value="${state.customCafe}">
+    `;
+    $('customCafeInput').addEventListener('input', e => { state.customCafe = e.target.value; renderOption(); });
+    return;
+  }
+
+  addBtn.hidden = false;
+  addBtn.textContent = state.showAddMenuForm ? '✕ 취소' : '＋ 메뉴 추가';
+
+  const menus = getCafeMenus(state.cafeKey);
+  area.innerHTML = `
+    <div class="notice">${cafe.note || ''}</div>
+    <div class="menu-list">
+      ${menus.map((m, i) => `
+        <div class="menu-item ${m._custom ? 'custom-menu' : ''} ${state.menuIdx === i ? 'active' : ''}" data-menu="${i}">
+          <span class="name">
+            ${m.name}
+            ${m._custom ? '<span class="star">★</span>' : ''}
+            ${m.iceOnly ? ' <span class="pill-ice">ICE</span>' : ''}
+          </span>
+          <span style="display:flex; align-items:center; gap:4px;">
+            <span class="price">${won(m.price)}</span>
+            ${m._custom ? `<button class="menu-del" data-del-menu="${i}" title="삭제">✕</button>` : ''}
+          </span>
+        </div>
+      `).join('')}
+    </div>
+    ${state.showAddMenuForm ? renderAddMenuForm() : ''}
+  `;
+
+  if (state.showAddMenuForm) {
+    $('newMenuName').addEventListener('input', e => state.newMenu.name = e.target.value);
+    $('newMenuPrice').addEventListener('input', e => state.newMenu.price = e.target.value);
+    document.querySelectorAll('.temp-opt').forEach(o => o.onclick = () => {
+      state.newMenu.temp = o.dataset.tempOpt;
+      renderMenu();
+    });
+    $('saveMenuBtn').onclick = saveNewMenu;
+  }
+}
+
+function renderAddMenuForm() {
+  return `
+    <div class="add-menu-form">
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:var(--custom);">★ 이 카페에 새 메뉴 추가</div>
+      <div class="form-row">
+        <input class="input" id="newMenuName" placeholder="메뉴명" value="${state.newMenu.name}">
+        <input class="input" id="newMenuPrice" type="number" placeholder="가격" value="${state.newMenu.price}">
+      </div>
+      <div class="temp-opts">
+        <div class="temp-opt ${state.newMenu.temp==='both'?'active':''}" data-temp-opt="both">HOT/ICE 모두</div>
+        <div class="temp-opt ${state.newMenu.temp==='ice'?'active':''}" data-temp-opt="ice">ICE 전용</div>
+        <div class="temp-opt ${state.newMenu.temp==='none'?'active':''}" data-temp-opt="none">옵션 없음</div>
+      </div>
+      <button class="btn btn-custom" id="saveMenuBtn" style="width:100%;">저장</button>
+    </div>
+  `;
+}
+
+function renderOption() {
+  const area = $('optionArea');
+  const cafe = state.cafeKey ? DEFAULT_CAFES[state.cafeKey] : null;
+
+  if (!cafe) {
+    area.innerHTML = '<div class="empty">메뉴를 먼저 선택하세요</div>';
+    return;
+  }
+
+  if (cafe.custom) {
+    area.innerHTML = `
+      <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">메뉴명</label>
+      <input class="input" id="customMenuInput" placeholder="예: 카라멜 마키아토" value="${state.customMenu}" style="margin-bottom:10px;">
+      <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:4px;">가격 (숫자만)</label>
+      <input class="input" id="customPriceInput" type="number" placeholder="예: 5500" value="${state.customPrice}" style="margin-bottom:10px;">
+      <div class="temp-row">
+        <button class="temp-btn hot ${state.temp==='HOT'?'active':''}" data-temp="HOT">🔥 HOT</button>
+        <button class="temp-btn ice ${state.temp==='ICE'?'active':''}" data-temp="ICE">🧊 ICE</button>
+        <button class="temp-btn ${state.temp==='-'?'active':''}" data-temp="-" style="background:#e2e8f0;">없음</button>
+      </div>
+      <label style="font-size:13px; color:var(--muted); display:block; margin: 12px 0 4px;">요청사항 (선택)</label>
+      <input class="input" id="noteInput" placeholder="예: 샷 추가, 시럽 빼고">
+      <div class="btn-row">
+        <button class="btn" id="addOrderBtn" style="flex:1;">＋ 주문에 추가</button>
+      </div>
+    `;
+    $('customMenuInput').addEventListener('input', e => state.customMenu = e.target.value);
+    $('customPriceInput').addEventListener('input', e => state.customPrice = e.target.value);
+    area.querySelectorAll('.temp-btn').forEach(b => b.onclick = () => { state.temp = b.dataset.temp; renderOption(); });
+    $('addOrderBtn').onclick = addOrder;
+    return;
+  }
+
+  if (state.menuIdx === null) {
+    area.innerHTML = '<div class="empty">메뉴를 먼저 선택하세요</div>';
+    return;
+  }
+
+  const menus = getCafeMenus(state.cafeKey);
+  const menu = menus[state.menuIdx];
+  if (!menu) { area.innerHTML = '<div class="empty">메뉴를 다시 선택하세요</div>'; return; }
+
+  const showTemp = menu.temp;
+  const iceOnly = menu.iceOnly;
+
+  area.innerHTML = `
+    <div style="padding:12px; background:#f1f5f9; border-radius:8px; margin-bottom:12px;">
+      <div style="font-weight:700; font-size:15px;">${menu.name} ${menu._custom ? '<span class="star">★</span>' : ''}</div>
+      <div style="font-size:13px; color:var(--muted); margin-top:2px;">${cafe.name}</div>
+      <div style="font-weight:700; color:var(--primary-dark); font-size:16px; margin-top:6px;">${won(menu.price)}</div>
+    </div>
+    ${showTemp ? `
+      <label style="font-size:13px; color:var(--muted); display:block; margin-bottom:6px;">온도 선택</label>
+      <div class="temp-row">
+        <button class="temp-btn hot ${state.temp==='HOT'?'active':''}" data-temp="HOT">🔥 HOT</button>
+        <button class="temp-btn ice ${state.temp==='ICE'?'active':''}" data-temp="ICE">🧊 ICE</button>
+      </div>
+    ` : iceOnly ? `
+      <div class="notice">아이스 전용 메뉴입니다</div>
+    ` : `
+      <div class="notice">온도 옵션이 없는 메뉴입니다</div>
+    `}
+    <label style="font-size:13px; color:var(--muted); display:block; margin: 12px 0 4px;">요청사항 (선택)</label>
+    <input class="input" id="noteInput" placeholder="예: 샷 추가, 시럽 빼고">
+    <div class="btn-row">
+      <button class="btn" id="addOrderBtn" style="flex:1;">＋ 주문에 추가</button>
+    </div>
+  `;
+  area.querySelectorAll('.temp-btn').forEach(b => b.onclick = () => { state.temp = b.dataset.temp; renderOption(); });
+  $('addOrderBtn').onclick = addOrder;
+}
+
+function renderOrders() {
+  const list = $('orderList');
+  const dayOrders = state.orders.filter(o => o.date === state.date);
+  $('orderCount').textContent = dayOrders.length ? `(${dayOrders.length}건)` : '';
+  if (dayOrders.length === 0) {
+    list.innerHTML = '<div class="empty">이 날짜에 주문이 없습니다</div>';
+    $('summary').innerHTML = '';
+    return;
+  }
+  list.innerHTML = dayOrders.map(o => {
+    const realIdx = state.orders.indexOf(o);
+    return `
+      <div class="order-item">
+        <div class="info">
+          <div class="person">${o.person}</div>
+          <div class="detail">
+            ${o.temp === 'HOT' ? '<span class="pill-hot">HOT</span>' : ''}
+            ${o.temp === 'ICE' ? '<span class="pill-ice">ICE</span>' : ''}
+            ${o.menu} · ${won(o.price)}
+            ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${o.note}</div>` : ''}
+          </div>
+          <div class="cafe">${o.cafe}</div>
+        </div>
+        <button class="remove" data-remove="${realIdx}" title="삭제">✕</button>
+      </div>
+    `;
+  }).join('');
+
+  const byCafe = {};
+  let total = 0;
+  dayOrders.forEach(o => {
+    if (!byCafe[o.cafe]) byCafe[o.cafe] = { count: 0, sum: 0 };
+    byCafe[o.cafe].count++;
+    byCafe[o.cafe].sum += o.price;
+    total += o.price;
+  });
+  $('summary').innerHTML = `
+    <div class="summary">
+      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${c}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
+      <div class="row total"><span>합계</span><span>${dayOrders.length}잔 · ${won(total)}</span></div>
+    </div>
+  `;
+}
+
+/* ============ 달력 ============ */
+function renderCalendar() {
+  const [y, m] = state.calendarMonth.split('-').map(Number);
+  const first = new Date(y, m - 1, 1);
+  const lastDate = new Date(y, m, 0).getDate();
+  const firstDow = first.getDay();
+
+  $('calTitle').textContent = `${y}년 ${m}월`;
+
+  const dowLabels = ['일','월','화','수','목','금','토'];
+  let html = dowLabels.map((d, i) =>
+    `<div class="cal-dow ${i===0?'sun':''} ${i===6?'sat':''}">${d}</div>`
+  ).join('');
+
+  // 주문 데이터를 날짜별로 집계
+  const byDate = {};
+  state.orders.forEach(o => {
+    if (!byDate[o.date]) byDate[o.date] = { count: 0, sum: 0 };
+    byDate[o.date].count++;
+    byDate[o.date].sum += o.price;
+  });
+
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= lastDate; d++) {
+    const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const stat = byDate[dateStr];
+    const dow = new Date(y, m-1, d).getDay();
+    const isToday = dateStr === todayStr();
+    const isSelected = dateStr === state.historyDate;
+    html += `
+      <div class="cal-day ${isToday?'today':''} ${isSelected?'selected':''}" data-cal-date="${dateStr}">
+        <div class="cal-date ${dow===0?'sun':''} ${dow===6?'sat':''}">${d}</div>
+        ${stat ? `<div class="cal-count">${stat.count}잔</div><div class="cal-amount">${(stat.sum/1000).toFixed(0)}k</div>` : ''}
+      </div>
+    `;
+  }
+  $('calGrid').innerHTML = html;
+  renderHistoryDay();
+}
+
+function renderHistoryDay() {
+  $('historyDateLabel').textContent = `${formatDate(state.historyDate)} 주문 내역`;
+  const dayOrders = state.orders.filter(o => o.date === state.historyDate);
+  const list = $('historyOrders');
+  if (dayOrders.length === 0) {
+    list.innerHTML = '<div class="empty">이 날짜에 주문이 없습니다</div>';
+    $('historySummary').innerHTML = '';
+    return;
+  }
+  list.innerHTML = dayOrders.map(o => `
+    <div class="order-item">
+      <div class="info">
+        <div class="person">${o.person}</div>
+        <div class="detail">
+          ${o.temp === 'HOT' ? '<span class="pill-hot">HOT</span>' : ''}
+          ${o.temp === 'ICE' ? '<span class="pill-ice">ICE</span>' : ''}
+          ${o.menu} · ${won(o.price)}
+          ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-top:2px;">↳ ${o.note}</div>` : ''}
+        </div>
+        <div class="cafe">${o.cafe}</div>
+      </div>
+    </div>
+  `).join('');
+  const byCafe = {};
+  let total = 0;
+  dayOrders.forEach(o => {
+    if (!byCafe[o.cafe]) byCafe[o.cafe] = { count: 0, sum: 0 };
+    byCafe[o.cafe].count++;
+    byCafe[o.cafe].sum += o.price;
+    total += o.price;
+  });
+  $('historySummary').innerHTML = `
+    <div class="summary">
+      ${Object.entries(byCafe).map(([c, v]) => `<div class="row"><span>${c}</span><span>${v.count}잔 · ${won(v.sum)}</span></div>`).join('')}
+      <div class="row total"><span>합계</span><span>${dayOrders.length}잔 · ${won(total)}</span></div>
+    </div>
+  `;
+}
+
+/* ============ 액션 ============ */
+function addOrder() {
+  if (!state.date) return toast('날짜를 선택하세요', '#ef4444');
+  if (!state.person) return toast('주문자를 선택하세요', '#ef4444');
+  if (!state.cafeKey) return toast('카페를 선택하세요', '#ef4444');
+
+  const cafe = DEFAULT_CAFES[state.cafeKey];
+  let menuName, price, cafeName;
+
+  if (cafe.custom) {
+    if (!state.customCafe.trim()) return toast('카페명을 입력하세요', '#ef4444');
+    if (!state.customMenu.trim()) return toast('메뉴명을 입력하세요', '#ef4444');
+    if (!state.customPrice || +state.customPrice <= 0) return toast('가격을 입력하세요', '#ef4444');
+    menuName = state.customMenu.trim();
+    price = +state.customPrice;
+    cafeName = state.customCafe.trim();
+  } else {
+    if (state.menuIdx === null) return toast('메뉴를 선택하세요', '#ef4444');
+    const menus = getCafeMenus(state.cafeKey);
+    const m = menus[state.menuIdx];
+    if (m.temp && !state.temp) return toast('HOT / ICE를 선택하세요', '#ef4444');
+    menuName = m.name;
+    price = m.price;
+    cafeName = cafe.name;
+    if (m.iceOnly) state.temp = 'ICE';
+    if (!m.temp && !m.iceOnly) state.temp = null;
+  }
+
+  const note = $('noteInput') ? $('noteInput').value.trim() : '';
+
+  state.orders.push({
+    date: state.date,
+    person: state.person,
+    cafe: cafeName,
+    menu: menuName,
+    price,
+    temp: state.temp,
+    note,
+    at: Date.now(),
+  });
+  save();
+  renderOrders();
+  toast(`${state.person} 주문 추가됨!`);
+
+  state.menuIdx = null;
+  state.temp = null;
+  state.customMenu = '';
+  state.customPrice = '';
+  renderMenu();
+  renderOption();
+}
+
+function removeOrder(i) {
+  state.orders.splice(i, 1);
+  save();
+  renderOrders();
+}
+
+function clearDay() {
+  const dayOrders = state.orders.filter(o => o.date === state.date);
+  if (dayOrders.length === 0) return toast('삭제할 주문이 없습니다', '#ef4444');
+  if (!confirm(`${formatDate(state.date)} 주문 ${dayOrders.length}건을 삭제할까요?`)) return;
+  state.orders = state.orders.filter(o => o.date !== state.date);
+  save();
+  renderOrders();
+  toast('해당 날짜 주문 삭제됨');
+}
+
+function saveNewMenu() {
+  const name = state.newMenu.name.trim();
+  const price = +state.newMenu.price;
+  if (!name) return toast('메뉴명을 입력하세요', '#ef4444');
+  if (!price || price <= 0) return toast('가격을 입력하세요', '#ef4444');
+
+  if (!state.customMenus[state.cafeKey]) state.customMenus[state.cafeKey] = [];
+  const menuObj = { name, price };
+  if (state.newMenu.temp === 'both') menuObj.temp = true;
+  else if (state.newMenu.temp === 'ice') { menuObj.temp = false; menuObj.iceOnly = true; }
+  else menuObj.temp = false;
+
+  state.customMenus[state.cafeKey].push(menuObj);
+  saveCustomMenus();
+  state.newMenu = { name: '', price: '', temp: 'both' };
+  state.showAddMenuForm = false;
+  renderMenu();
+  toast(`★ "${name}" 메뉴 추가됨`);
+}
+
+function deleteCustomMenu(idx) {
+  const menus = getCafeMenus(state.cafeKey);
+  const m = menus[idx];
+  if (!m || !m._custom) return;
+  if (!confirm(`"${m.name}" 메뉴를 삭제할까요?`)) return;
+
+  const base = DEFAULT_CAFES[state.cafeKey].menus.length;
+  const customIdx = idx - base;
+  state.customMenus[state.cafeKey].splice(customIdx, 1);
+  saveCustomMenus();
+  state.menuIdx = null;
+  renderMenu();
+  renderOption();
+  toast('메뉴 삭제됨');
+}
+
+function buildText(date) {
+  const orders = state.orders.filter(o => o.date === date);
+  if (orders.length === 0) return '';
+  const byCafe = {};
+  orders.forEach(o => {
+    if (!byCafe[o.cafe]) byCafe[o.cafe] = [];
+    byCafe[o.cafe].push(o);
+  });
+  let txt = `☕ 팀 커피 주문 - ${formatDate(date)}\n\n`;
+  let total = 0;
+  Object.entries(byCafe).forEach(([cafe, items]) => {
+    txt += `[${cafe}]\n`;
+    items.forEach(o => {
+      const temp = o.temp ? `(${o.temp}) ` : '';
+      const note = o.note ? ` - ${o.note}` : '';
+      txt += `  · ${o.person}: ${temp}${o.menu} ${won(o.price)}${note}\n`;
+      total += o.price;
+    });
+    txt += '\n';
+  });
+  txt += `━━━━━━━━━━━━━━━━━━━\n총 ${orders.length}잔 · ${won(total)}`;
+  return txt;
+}
+
+function copyText() {
+  const txt = buildText(state.date);
+  if (!txt) return toast('주문이 없습니다', '#ef4444');
+  navigator.clipboard.writeText(txt).then(() => toast('클립보드에 복사됨!'));
+}
+
+function exportFile() {
+  const txt = buildText(state.date);
+  if (!txt) return toast('주문이 없습니다', '#ef4444');
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `coffee-order-${state.date}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('파일 저장됨');
+}
+
+function exportAllCSV() {
+  if (state.orders.length === 0) return toast('주문이 없습니다', '#ef4444');
+  const header = 'date,person,cafe,menu,temp,price,note\n';
+  const rows = [...state.orders].sort((a,b)=>a.date.localeCompare(b.date)).map(o => {
+    const esc = (s) => `"${String(s ?? '').replace(/"/g,'""')}"`;
+    return [o.date, o.person, o.cafe, o.menu, o.temp || '', o.price, o.note || ''].map(esc).join(',');
+  }).join('\n');
+  const blob = new Blob(['﻿' + header + rows], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `coffee-orders-all-${todayStr()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV 저장됨');
+}
+
+/* ============ 이벤트 ============ */
+document.addEventListener('click', (e) => {
+  if (e.target.dataset.tab) {
+    state.tab = e.target.dataset.tab;
+    renderTabs();
+    return;
+  }
+  if (e.target.dataset.person) {
+    state.person = e.target.dataset.person;
+    renderPersons();
+  } else if (e.target.dataset.cafe) {
+    state.cafeKey = e.target.dataset.cafe;
+    state.menuIdx = null;
+    state.temp = null;
+    state.showAddMenuForm = false;
+    renderCafes();
+    renderMenu();
+    renderOption();
+  } else if (e.target.dataset.delMenu !== undefined) {
+    e.stopPropagation();
+    deleteCustomMenu(+e.target.dataset.delMenu);
+  } else if (e.target.closest('[data-menu]')) {
+    state.menuIdx = +e.target.closest('[data-menu]').dataset.menu;
+    const menus = getCafeMenus(state.cafeKey);
+    const m = menus[state.menuIdx];
+    state.temp = m.iceOnly ? 'ICE' : null;
+    renderMenu();
+    renderOption();
+  } else if (e.target.dataset.remove !== undefined) {
+    removeOrder(+e.target.dataset.remove);
+  } else if (e.target.closest('[data-cal-date]')) {
+    state.historyDate = e.target.closest('[data-cal-date]').dataset.calDate;
+    state.date = state.historyDate;
+    renderCalendar();
+    renderDate();
+    renderOrders();
+  } else if (e.target.dataset.quick) {
+    const d = new Date();
+    if (e.target.dataset.quick === 'yesterday') d.setDate(d.getDate() - 1);
+    state.date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    renderDate();
+    renderOrders();
+  }
+});
+
+$('dateInput').addEventListener('change', e => {
+  state.date = e.target.value;
+  renderDate();
+  renderOrders();
+});
+
+$('toggleAddMenuBtn').onclick = () => {
+  state.showAddMenuForm = !state.showAddMenuForm;
+  renderMenu();
+};
+
+$('prevMonth').onclick = () => {
+  const [y, m] = state.calendarMonth.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  state.calendarMonth = ymStr(d);
+  renderCalendar();
+};
+$('nextMonth').onclick = () => {
+  const [y, m] = state.calendarMonth.split('-').map(Number);
+  const d = new Date(y, m, 1);
+  state.calendarMonth = ymStr(d);
+  renderCalendar();
+};
+
+$('copyBtn').onclick = copyText;
+$('exportBtn').onclick = exportFile;
+$('clearBtn').onclick = clearDay;
+$('historyExportAll').onclick = exportAllCSV;
+
+/* ============ 초기 렌더 ============ */
+renderTabs();
+renderDate();
+renderPersons();
+renderCafes();
+renderMenu();
+renderOption();
+renderOrders();
+</script>
+</body>
+</html>
