@@ -4,10 +4,11 @@
 // ============================================================
 
 window.firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: "",
+  apiKey: "AIzaSyAV_CeiAknvwy6JLRkXC89G0N9qrkTul24",
+  authDomain: "teamorder1-1a3ed.firebaseapp.com",
+  projectId: "teamorder1-1a3ed",
+  storageBucket: "teamorder1-1a3ed.firebasestorage.app",
+  messagingSenderId: "446080161153",
+  appId: "1:446080161153:web:e6fcbc240ba710ba29c480",
+  measurementId: "G-9EHREGXTTS"
 };
